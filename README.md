@@ -1,8 +1,5 @@
 # CJW_Math
 Math based on CoI on SE(3) about robot
-
-
-
 Some Mathematical Operations in SE (3) Based on Inertial Center Dynamics
 Class template is CJW_ Math<TT>, the array storage matrix is easy to operate, and the simplified element operation is used to speed up the calculation
 #基于惯性中心动力学在SE（3）的一些数学操作
@@ -10,7 +7,6 @@ Class template is CJW_ Math<TT>, the array storage matrix is easy to operate, an
 
 
 The entire class contains the following functions:
-
 1 Simple display of array matrix
 2 Three-dimensional vector and six-dimensional matrix operation
 3 Basic operation of matrix, QR decomposition of square matrix Gaussian, square matrix determinant, eigenvector and characteristic matrix of symmetric square matrix, SVD decomposition, inverse matrix of Gaussian algorithm square matrix
