@@ -1,45 +1,45 @@
-# Robot Math Library Based on CoI and SE3
+# 基于惯性中心动力学和SE3的机器人数学库<br>
 
-- The library contains functions based on CoI and basic operations on SE3.
+- 库中包含了基于惯性中心动力学的功能函数和SE3上的基本操作<br>
 
-- The class template is CJW_Math, which uses arrays to store matrices. Pose calculations use simplified element operations to speed up calculations.
+- 类模板为CJW_Math,使用数组存放矩阵，位姿计算都使用简化后的元素操作加快计算速度<br>
 
-# The library includes the following features:
+# 整个类包含以下功能：<br>
 
-1. vectors & matrices display.
+1. 数组矩阵显示<br>
 
-2. Three-dimensional vector and six-dimensional matrix operations.
+2. 三维矢量和六维矩阵运算<br>
 
-3. Basic matrix operations:
+3. 矩阵的基本操作:
 
-    - QR decomposition of square matrices.
+    - 方阵高斯的QR分解
 
-    - Determinant of square matrices.
+    - 方阵行列式
 
-    - Eigenvectors and eigenmatrices of symmetric matrices.
+    - 对称方阵的特征向量和特征矩阵
 
-    - SVD decomposition of matrices.
+    - 矩阵的SVD分解
 
-    - Inverse matrix based on Gauss algorithmic.
+    - 高斯算法方阵逆矩阵<br>
 
-4. General operations of rotation matrices of rigid body.
+4. 刚体旋转矩阵通用操作<br>
 
-5. General operations of posture matrices of rigid body.
+5. 刚体位姿矩阵通用操作<br>
 
-6. Attitude expression switching
+6. 姿态表达切换<br>
 
-7. General operations of posture matrix based on exponential coordinates.
+7. 位姿矩阵基于指数坐标表达基本操作<br>
 
-8. Adjoint transformation of posture matrices and their Spinor.
+8. 位姿矩阵及其旋量的伴随变换<br>
 
-9. Differential operations of posture matrices based on exponential coordinates.
+9. 位姿矩阵基于指数坐标表达的微分运算<br>
 
-10. Spinor conversion of rigid body posture matrix, velocity and exponential mapping
+10. 刚体位姿矩阵、速度和指数映射旋量的转换<br>
 
-11. PD control of posture matrix of rigid body based on exponential coordinates.
+11. 刚体位姿矩阵指数坐标空间PD控制<br>
 
-12. Coordinate transformation of generalized inertia matrix.
+12. 广义惯性矩阵的坐标转换<br>
 
-13. Dynamic equations based on inertial center.
+13. 基于惯性中心的动力学方程<br>
 
-14. Boolean operations on sets.
+14. 一些简单集合关系运算<br>
