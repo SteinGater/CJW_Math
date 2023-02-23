@@ -2,7 +2,7 @@ Math based on CoI on SE3 about robot<br>
 Some Mathematical Operations in SE3Based on Inertial Center Dynamics<br>
 Class template is CJW_ Math，the array storage matrix is easy to operate, and the simplified element operation is used to speed up the calculation<br>
 基于惯性中心动力学在SE3的一些数学操作<br>
-类模板为CJW_Math<TT>,数组存放矩阵便于操作，位姿计算都使用简化后的元素操作加快计算速度<br>
+类模板为CJW_Math,数组存放矩阵便于操作，位姿计算都使用简化后的元素操作加快计算速度<br>
 The entire class contains the following functions:<br>
 1 Simple display of array matrix<br>
 2 Three-dimensional vector and six-dimensional matrix operation<br>
