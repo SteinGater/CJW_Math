@@ -842,36 +842,16 @@ void CJW_Math<TT>::MyRToExponent3(TT R[9], TT w[3])//旋转矩阵=指数坐标
 	TT tmp_sino = sin(tro);
 	if (fabs(tmp_sino) < EXP_ZERO)
 	{
-		//轴线绝对值
-		TT wabs[3] = { sqrt((R[0] - trR) / 2),sqrt((R[4] - trR) / 2),sqrt((R[8] - trR) / 2) };
-		if (wabs[0] < EXP_ZERO)
-		{
-			w[0] = 0;
-			if (wabs[1] < EXP_ZERO)
-			{
-				w[1] = 0;
-				w[2] = wabs[2] * tro;
-			}
-			else
-			{
-				w[1] = wabs[1] * tro;
-				w[2] = R[5] / w[1] / 2 * tro;
-			}
-		}
-		else
-		{
-			w[0] = wabs[0] * tro;
-			if (wabs[1] < EXP_ZERO)
-			{
-				w[1] = 0;
-				w[2] = R[2] / wabs[0] / 2 * tro;
-			}
-			else
-			{
-				w[1] = R[1] / 2 / wabs[0] * tro;
-				w[2] = R[5] / w[1] / 2 * tro;
-			}
-		}
+            if ((tro < EXP_ZERO) && (tro > -EXP_ZERO))
+	    {
+                w[0] = 0; w[1] = 0; w[2] = 0;
+	    }
+            else
+            {
+                w[0] = sqrt((R[0]+1) / 2)*tro;
+                w[1] = sqrt((R[4]+1) / 2)*tro;
+                w[2] = sqrt((R[8]+1) / 2)*tro;
+            }
 	}
 	else
 	{
@@ -880,41 +860,6 @@ void CJW_Math<TT>::MyRToExponent3(TT R[9], TT w[3])//旋转矩阵=指数坐标
 		w[2] = (R[3] - R[1])*tro / 2 / tmp_sino;
 	}
 }
-/*template <typename TT>
-void CJW_Math<TT>::MyRToExponent3(TT R[9], TT w[3])//旋转矩阵=指数坐标
-{
-	//求解变换矩阵
-	TT trR = R[0]+R[4]+R[8];
-	if(trR>3)
-	{
-		trR=3;
-	}
-	else if(trR<-1)
-	{
-		trR=-1;
-	}
-	TT tro = acos((trR - 1) / 2);
-	TT tmp_sino = sin(tro);
-	if (fabs(tmp_sino) < EXP_ZERO)
-	{
-		if(tro<M_PI/2)
-		{
-			w[0] = 0; w[1] = 0; w[2] = 0;
-		}
-		else
-		{
-			w[0] = sqrt((R[0]-trR)/2)*tro;
-			w[1] = sqrt((R[4]-trR)/2)*tro;
-			w[2] = sqrt((R[8]-trR)/2)*tro;
-		}
-	}
-	else
-	{
-		w[0] = (R[7] - R[5])*tro / 2 / tmp_sino;
-		w[1] = (R[2] - R[6])*tro / 2 / tmp_sino;
-		w[2] = (R[3] - R[1])*tro / 2 / tmp_sino;
-	}
-}*/
 template <typename TT>
 void CJW_Math<TT>::MyExponent3ToQuaternion(TT w[3], TT q[4])//指数坐标转四元数xyzw
 {
@@ -997,38 +942,11 @@ void CJW_Math<TT>::MyGToExponent4(TT R[16], TT w[6])//位姿矩阵转指数坐�
 	{
 		TT tmp_sino = sin(tro);
 		TT ww[3];
-		if (fabs(tmp_sino) < EXP_ZERO)
+		if (tro>M_PI-EXP_ZERO)
 		{
-			// 轴线绝对值
-			TT wabs[3] = { sqrt((R[0] - trR) / 2), sqrt((R[5] - trR) / 2), sqrt((R[10] - trR) / 2) };
-			if (wabs[0] < EXP_ZERO)
-			{
-				ww[0] = 0;
-				if (wabs[1] < EXP_ZERO)
-				{
-					ww[1] = 0;
-					ww[2] = wabs[2];
-				}
-				else
-				{
-					ww[1] = wabs[1];
-					ww[2] = R[6] / ww[1] / 2;
-				}
-			}
-			else
-			{
-				ww[0] = wabs[0];
-				if (wabs[1] < EXP_ZERO)
-				{
-					ww[1] = 0;
-					ww[2] = R[2] / wabs[0] / 2;
-				}
-				else
-				{
-					ww[1] = R[1] / 2 / wabs[0];
-					ww[2] = R[6] / ww[1] / 2;
-				}
-			}
+			ww[0] = sqrt((R[0]+1) / 2); 
+            ww[1] = sqrt((R[5]+1) / 2);
+            ww[2] = sqrt((R[10]+1) / 2);
 		}
 		else
 		{
