@@ -842,16 +842,16 @@ void CJW_Math<TT>::MyRToExponent3(TT R[9], TT w[3])//旋转矩阵=指数坐标
 	TT tmp_sino = sin(tro);
 	if (fabs(tmp_sino) < EXP_ZERO)
 	{
-            if ((tro < EXP_ZERO) && (tro > -EXP_ZERO))
+        if ((tro < EXP_ZERO) && (tro > -EXP_ZERO))
 	    {
-                w[0] = 0; w[1] = 0; w[2] = 0;
+		    w[0] = 0; w[1] = 0; w[2] = 0;
 	    }
-            else
-            {
-                w[0] = sqrt((R[0]+1) / 2)*tro;
-                w[1] = sqrt((R[4]+1) / 2)*tro;
-                w[2] = sqrt((R[8]+1) / 2)*tro;
-            }
+        else
+        {
+            w[0] = sqrt((R[0]+1) / 2)*tro; 
+            w[1] = sqrt((R[4]+1) / 2)*tro;
+            w[2] = sqrt((R[8]+1) / 2)*tro;
+        }
 	}
 	else
 	{
@@ -1712,7 +1712,7 @@ void CJW_Math<TT>::RigidBody_SO3_PDcontroller(TT Re[9],TT Ve[3],TT Ae[3],TT Rr[9
     //mapping to the Ar
     TT AA1[3]={0};
     MyVector3ToDisMatrix(Vd,temp);
-    MyRCompositionw(temp,Vr,AA1);
+    MyRCompositionw(temp,Ve,AA1);
     TT AA2[3]={0};
     TT dSd_1[3]={-dSd[0],-dSd[1],-dSd[2]};
     MyddEXP3(Sd_1,dSd_1,temp);
@@ -1720,9 +1720,9 @@ void CJW_Math<TT>::RigidBody_SO3_PDcontroller(TT Re[9],TT Ve[3],TT Ae[3],TT Rr[9
     TT AA3[3]={0};MydEXP3(Sd_1,temp);
     MyRCompositionw(temp,ddSd,AA3);
     TT ALL[3]={0};
-    ALL[0]=Ae[0]-AA2[0]+AA3[0];ALL[1]=Ae[1]-AA2[1]+AA3[1];ALL[2]=Ae[2]-AA2[2]+AA3[2];
+    ALL[0]=Ae[0]+AA1[0]-AA2[0]+AA3[0];ALL[1]=Ae[1]+AA1[1]-AA2[1]+AA3[1];ALL[2]=Ae[2]+AA1[2]-AA2[2]+AA3[2];
     TT ALL2[3]={0};MyRCompositionw(Rd,ALL,ALL2);
-    Aout[0]=ALL2[0]+AA1[0];Aout[1]=ALL2[1]+AA1[1];Aout[2]=ALL2[2]+AA1[2];
+    Aout[0]=ALL2[0];Aout[1]=ALL2[1];Aout[2]=ALL2[2];
 }
 template <typename TT>
 void CJW_Math<TT>::RigidBody_SE3_PDcontroller(TT Ge[16],TT Ve[6],TT Ae[6],TT Gr[16],TT Vr[6],TT Kp[6],TT Kd[6],TT Aout[6])
@@ -1749,7 +1749,7 @@ void CJW_Math<TT>::RigidBody_SE3_PDcontroller(TT Ge[16],TT Ve[6],TT Ae[6],TT Gr[
     //mapping to the Ar
     TT AA1[6]={0};
     MyEXPad(Vd,temp);
-    MyMatrixMultiply(6,1,6,temp,Vr,AA1);
+    MyMatrixMultiply(6,1,6,temp,Ve,AA1);
     TT AA2[6]={0};
     TT dSd_1[6]={-dSd[0],-dSd[1],-dSd[2],-dSd[3],-dSd[4],-dSd[5]};
     //Show(1,6,dSd_1);
@@ -1759,11 +1759,11 @@ void CJW_Math<TT>::RigidBody_SE3_PDcontroller(TT Ge[16],TT Ve[6],TT Ae[6],TT Gr[
     TT AA3[6]={0};MydEXP4(Sd_1,temp);
     MyMatrixMultiply(6,1,6,temp,ddSd,AA3);
     TT ALL[6]={0};
-    ALL[0]=Ae[0]-AA2[0]+AA3[0];ALL[1]=Ae[1]-AA2[1]+AA3[1];ALL[2]=Ae[2]-AA2[2]+AA3[2];
-    ALL[3]=Ae[3]-AA2[3]+AA3[3];ALL[4]=Ae[4]-AA2[4]+AA3[4];ALL[5]=Ae[5]-AA2[5]+AA3[5];
+    ALL[0]=Ae[0]+AA1[0]-AA2[0]+AA3[0];ALL[1]=Ae[1]+AA1[1]-AA2[1]+AA3[1];ALL[2]=Ae[2]+AA1[2]-AA2[2]+AA3[2];
+    ALL[3]=Ae[3]+AA1[3]-AA2[3]+AA3[3];ALL[4]=Ae[4]+AA1[4]-AA2[4]+AA3[4];ALL[5]=Ae[5]+AA1[5]-AA2[5]+AA3[5];
     TT ALL2[6]={0};MyEXPAdgScrew(Gd,ALL,ALL2);
-    Aout[0]=ALL2[0]+AA1[0];Aout[1]=ALL2[1]+AA1[1];Aout[2]=ALL2[2]+AA1[2];
-    Aout[3]=ALL2[3]+AA1[3];Aout[4]=ALL2[4]+AA1[4];Aout[5]=ALL2[5]+AA1[5];
+    Aout[0]=ALL2[0];Aout[1]=ALL2[1];Aout[2]=ALL2[2];
+    Aout[3]=ALL2[3];Aout[4]=ALL2[4];Aout[5]=ALL2[5];
 }
 
 
