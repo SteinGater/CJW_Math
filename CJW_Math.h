@@ -201,13 +201,17 @@ public:
     void MyExponent4ToG(TT ww[6], TT th, TT G[16]);//旋量-角度 转位姿矩阵
     int MySeriesR(TT Rout[9], int N, ...);//旋转矩阵连乘Rout=R1*...*RN,变参数为关节角速度
     int MySeriesG(TT Gout[16], int N, ...);//位姿矩阵连乘Gout=G1*...*GN,变参数为关节旋量
-    int MySeriesExp3ToR(TT Rout[9], TT* th, int N,  ...);//轴-角 转 旋转矩阵连乘,变参数为关节角速度
-    int MySeriesExp4ToG(TT Gout[16], TT* th,int N,  ...);//旋量-角度 转 位姿矩阵连乘,变参数为关节旋量
-    int MySeriesScrewToJacobianS( TT* Jout, TT* th,int N, ...);//旋量-角度 转 位姿矩阵连乘的雅克比-根部坐标系,变参数为关节旋量
-    int MySeriesScrewToJacobianB( TT* Jout, TT* th,int N, ...);//旋量-角度 转 位姿矩阵连乘的雅克比-末端坐标系,变参数为关节旋量
-    //旋量-角度 转 位姿矩阵连乘的质心-根部坐标系,变参数为质心位置和关节旋量：m_p[0],screw[0],m_p[1],screw[1] ...
+    //轴-角 转 旋转矩阵连乘,变参数为初始状态绝对坐标系的关节角速度
+    int MySeriesExp3ToR(TT Rout[9], TT* th, int N,  ...);
+    //旋量-角度 转 位姿矩阵连乘,变参数为初始状态绝对坐标系的关节旋量
+    int MySeriesExp4ToG(TT Gout[16], TT* th,int N,  ...);
+    //旋量-角度 转 位姿矩阵连乘的雅克比-根部坐标系,变参数为初始状态绝对坐标系的关节旋量
+    int MySeriesScrewToJacobianS( TT* Jout, TT* th,int N, ...);
+    //旋量-角度 转 位姿矩阵连乘的雅克比-末端坐标系,变参数为初始状态绝对坐标系的关节旋量
+    int MySeriesScrewToJacobianB( TT* Jout, TT* th,int N, ...);
+    //旋量-角度 转 位姿矩阵连乘的质心-根部坐标系,变参数为初始状态绝对坐标系的质心位置和关节旋量：m_p[0],screw[0],m_p[1],screw[1] ...
     int MySeriesScrewMassToCoM(TT* sum_mass,TT CoMout[3], TT* mass, TT* th,int N, ...);
-    //旋量-角度 转 位姿矩阵连乘的广义惯性矩阵-根部坐标系,变参数为广义惯性矩阵和关节旋量：M[0],screw[0],M[1],screw[1] ...
+    //旋量-角度 转 位姿矩阵连乘的广义惯性矩阵-根部坐标系,变参数为初始状态绝对坐标系的广义惯性矩阵和关节旋量：M[0],screw[0],M[1],screw[1] ...
     int MySeriesScrewInertiaToCoI(TT CoIout[36], TT* th, int N, ...);
 
     /*************************************************一些几何运算****************************************/
