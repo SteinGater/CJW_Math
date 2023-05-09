@@ -1087,6 +1087,7 @@ void CJW_Math<TT>::MyEXPadT(TT w[6],TT ad[36])//旋量伴随转置
     ad[4]=w[5]; ad[10]=0;   ad[16]=-w[3];               ad[22]=w[2];    ad[28]=0;       ad[34]=-w[0];
     ad[5]=-w[4];ad[11]=w[3];ad[17]=0;                   ad[23]=-w[1];   ad[29]=w[0];    ad[35]=0;
 }
+
 /********************指数坐标的微分运算****************************************************/
 template <typename TT>
 void CJW_Math<TT>::MydEXP3(TT w[3],TT dexp[9])//指数坐标一阶导数
@@ -1766,7 +1767,6 @@ void CJW_Math<TT>::RigidBody_SE3_PDcontroller(TT Ge[16],TT Ve[6],TT Ae[6],TT Gr[
     Aout[3]=ALL2[3];Aout[4]=ALL2[4];Aout[5]=ALL2[5];
 }
 
-
 /********************广义惯性矩阵的坐标转换****************************************************/
 //trans based the body M to the absolute coordinate M
 template <typename TT>
@@ -1809,6 +1809,244 @@ void CJW_Math<TT>::DynamicBaseCOI(TT BodyM[36],TT BodydM[36],TT BodyV[6],TT Body
         outFref[i]=tempA1[i]+tempA2[i]-tempA3[i];//with the COI compen
         //outFref[i]=tempA1[i];//wihtout COI
     }
+}
+
+/*************************************串联指数积公式*************************************/
+template <typename TT>
+void CJW_Math<TT>::MyExponent3ToR(TT ww[3], TT th, TT R[9])//轴-角 转旋转矩阵
+{
+    //求解变换矩阵
+    R[0] = 1 + (-ww[1] * ww[1] - ww[2] * ww[2])*(1 - cos(th));
+    R[1] = -ww[2] * sin(th) + ww[0] * ww[1] * (1 - cos(th));
+    R[2] = ww[1] * sin(th) + ww[0] * ww[2] * (1 - cos(th));
+    R[3] = ww[2] * sin(th) + ww[0] * ww[1] * (1 - cos(th));
+    R[4] = 1 + (-ww[0] * ww[0] - ww[2] * ww[2])*(1 - cos(th));
+    R[5] = -ww[0] * sin(th) + ww[1] * ww[2] * (1 - cos(th));
+    R[6] = -ww[1] * sin(th) + ww[0] * ww[2] * (1 - cos(th));
+    R[7] = ww[0] * sin(th) + ww[1] * ww[2] * (1 - cos(th));
+    R[8] = 1 + (-ww[0] * ww[0] - ww[1] * ww[1])*(1 - cos(th));
+}
+template <typename TT>
+void CJW_Math<TT>::MyExponent4ToG(TT ww[6], TT th, TT G[16])//旋量-角度 转位姿矩阵
+{
+    TT w[6]={ww[0]*th,ww[1]*th,ww[2]*th,ww[3]*th,ww[4]*th,ww[5]*th};
+    MyExponent4ToG(w,G);
+}
+template <typename TT>
+int CJW_Math<TT>::MySeriesR(TT Rout[9],int N,  ...)//旋转矩阵连乘RR=RS1*RS2*RS3*...*RSN
+{
+    if(N<=0)
+    {
+        return M_ERROR;
+    }
+    va_list arg_ptr;
+    va_start(arg_ptr, N);
+    TT* RS=va_arg(arg_ptr,TT*);
+    MyMatrixCopy(9,RS,Rout);
+    TT Rtemp[9];
+    for(int i=1;i<N;i++)
+    {
+        RS=va_arg(arg_ptr,TT*);
+        MyRCompositionR(Rout,RS,Rtemp);
+        MyMatrixCopy(9,Rtemp,Rout);
+    }
+    va_end(arg_ptr);
+    return M_RIGHT;
+}
+template <typename TT>
+int CJW_Math<TT>::MySeriesG(TT Gout[16],int N,  ...)//位姿矩阵连乘GG=GS1*GS2*GS3*...*GSN
+{
+    if(N<=0)
+    {
+        return M_ERROR;
+    }
+    va_list arg_ptr;
+    va_start(arg_ptr, N);
+    TT* GS=va_arg(arg_ptr,TT*);
+    MyMatrixCopy(16,GS,Gout);
+    TT Gtemp[16];
+    for(int i=1;i<N;i++)
+    {
+        GS=va_arg(arg_ptr,TT*);
+        MyGCompositionG(Gout,GS,Gtemp);
+        MyMatrixCopy(16,Gtemp,Gout);
+    }
+    va_end(arg_ptr);
+    return M_RIGHT;  
+}
+template <typename TT>
+int CJW_Math<TT>::MySeriesExp3ToR(TT Rout[9], TT* th, int N,  ...)//轴-角 转 旋转矩阵连乘
+{
+    if(N<=0)
+    {
+        return 1;
+    }
+    va_list arg_ptr;
+    va_start(arg_ptr, N);
+    TT* ws=va_arg(arg_ptr,TT*);
+    MyExponent3ToR(ws,th[0],Rout);
+    TT Rtemp[9];TT RS[9];
+    for(int i=1;i<N;i++)
+    {
+        ws=va_arg(arg_ptr,TT*);
+        MyExponent3ToR(ws,th[i],RS);
+        MyRCompositionR(Rout,RS,Rtemp);
+        MyMatrixCopy(9,Rtemp,Rout);
+    }
+    va_end(arg_ptr);
+    return M_RIGHT;
+}
+template <typename TT>
+int CJW_Math<TT>::MySeriesExp4ToG(TT Gout[16], TT* th, int N,  ...)//旋量-角度 转 位姿矩阵连乘
+{
+    if(N<=0)
+    {
+        return M_ERROR;
+    }
+    va_list arg_ptr;
+    va_start(arg_ptr, N);
+    TT* ws=va_arg(arg_ptr,TT*);
+    MyExponent4ToG(ws,th[0],Gout);
+    TT Gtemp[16];TT GS[16];
+    for(int i=1;i<N;i++)
+    {
+        ws=va_arg(arg_ptr,TT*);
+        MyExponent4ToG(ws,th[i],GS);
+        MyGCompositionG(Gout,GS,Gtemp);
+        MyMatrixCopy(16,Gtemp,Gout);
+    }
+    va_end(arg_ptr);
+    return M_RIGHT;
+}
+template <typename TT>
+int CJW_Math<TT>::MySeriesScrewToJacobianS(TT* Jout, TT* th, int N, ...)//旋量-角度 转 位姿矩阵连乘的雅克比-根部坐标系
+{
+    if(N<=0)
+    {
+        return M_ERROR;
+    }
+    va_list arg_ptr;
+    va_start(arg_ptr, N);
+    TT* ws=va_arg(arg_ptr,TT*);
+    for(int ii=0;ii<6;ii++)
+    {
+        Jout[ii*N]=ws[ii];
+    }
+    TT Gout[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    TT Gtemp[16];TT GS[16];TT tempkesi[6];
+    for(int i=1;i<N;i++)
+    {
+        MyExponent4ToG(ws,th[i-1],GS);
+        MyGCompositionG(Gout,GS,Gtemp);
+        MyMatrixCopy(16,Gtemp,Gout);
+        ws=va_arg(arg_ptr,TT*);
+        MyEXPAdgScrew(Gout,ws,tempkesi);
+        for(int ii=0;ii<6;ii++)
+        {
+            Jout[ii*N+i]=tempkesi[ii];
+        }
+    }
+    va_end(arg_ptr);
+    return M_RIGHT;
+}
+template <typename TT>
+int CJW_Math<TT>::MySeriesScrewToJacobianB(TT* Jout, TT* th, int N, ...)//旋量-角度 转 位姿矩阵连乘的雅克比-末端坐标系
+{
+    if(N<=0)
+    {
+        return M_ERROR;
+    }
+    va_list arg_ptr;
+    va_start(arg_ptr, N);
+    TT** ws=new TT*[N];
+    for(int i=0;i<N;i++)
+    {
+        ws[i]=va_arg(arg_ptr,TT*);
+    }
+    TT Gout[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    TT Gtemp[16];TT GS[16];TT tempkesi[6];
+    for(int i=N-1;i>=0;i--)
+    {
+        MyExponent4ToG(ws[i],th[i],GS);
+        MyGCompositionG(GS,Gout,Gtemp);
+        MyMatrixCopy(16,Gtemp,Gout);
+        MyEXPAdgInvScrew(Gout,ws[i],tempkesi);
+        for(int ii=0;ii<6;ii++)
+        {
+            Jout[ii*N+i]=tempkesi[ii];
+        }
+    }
+    va_end(arg_ptr);
+    delete [] ws;
+    return M_RIGHT;
+}
+//旋量-角度 转 位姿矩阵连乘的质心-根部坐标系,变参数为质心位置和关节旋量：m_p[0],screw[0],m_p[1],screw[1] ...
+template <typename TT>
+int CJW_Math<TT>::MySeriesScrewMassToCoM(TT* sum_mass, TT CoMout[3], TT* mass, TT* th, int N, ...)
+{
+    if(N<=0)
+    {
+        return M_ERROR;
+    }
+    va_list arg_ptr;
+    va_start(arg_ptr, N);
+    TT** mp0=new TT*[N];
+    TT** ws=new TT*[N];
+    for(int i=0;i<N;i++)
+    {
+        mp0[i]=va_arg(arg_ptr,TT*);
+        ws[i]=va_arg(arg_ptr,TT*);
+    }
+    TT Gout[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    TT Gtemp[16];TT GS[16];
+    sum_mass[0]=0;CoMout[0]=0;CoMout[1]=0;CoMout[2]=0;
+    for(int i=0;i<N;i++)
+    {
+        MyExponent4ToG(ws[i],th[i],GS);
+        MyGCompositionG(Gout,GS,Gtemp);
+        MyMatrixCopy(16,Gtemp,Gout);
+        TT temp_mp[4]={mp0[i][0],mp0[i][1],mp0[i][2],1};
+        TT temp_mp1[4]={0};MyGCompositionP(Gout,temp_mp,temp_mp1);
+        for(int j=0;j<3;j++){CoMout[j]=CoMout[j]+temp_mp1[j]*mass[i];}
+        sum_mass[0]=sum_mass[0]+mass[i];
+    }
+    for(int j=0;j<3;j++){CoMout[j]=CoMout[j]/sum_mass[0];}
+    va_end(arg_ptr);
+    delete [] mp0;
+    delete [] ws;
+    return M_RIGHT;
+}
+//旋量-角度 转 位姿矩阵连乘的广义惯性矩阵-根部坐标系,变参数为广义惯性矩阵和关节旋量：M[0],screw[0],M[1],screw[1] ...
+template <typename TT>
+int CJW_Math<TT>::MySeriesScrewInertiaToCoI(TT CoIout[36], TT* th, int N, ...)
+{
+    if(N<=0)
+    {
+        return M_ERROR;
+    }
+    va_list arg_ptr;
+    va_start(arg_ptr, N);
+    TT** M0=new TT*[N];
+    TT** ws=new TT*[N];
+    for(int i=0;i<N;i++)
+    {
+        M0[i]=va_arg(arg_ptr,TT*);
+        ws[i]=va_arg(arg_ptr,TT*);
+    }
+    TT Gout[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    TT Gtemp[16];TT GS[16];
+    for(int i=0;i<N;i++)
+    {
+        MyExponent4ToG(ws[i],th[i],GS);
+        MyGCompositionG(Gout,GS,Gtemp);
+        MyMatrixCopy(16,Gtemp,Gout);
+        TT temp_M[36];MyInertiaBasedGroup(M0[i],Gout,temp_M);
+        for(int j=0;j<36;j++){CoIout[j]=CoIout[j]+temp_M[j];}
+    }
+    va_end(arg_ptr);
+    delete [] M0;
+    delete [] ws;
+    return M_RIGHT;
 }
 
 

@@ -1,10 +1,24 @@
+/*********************************************************************************************/
+//MMMR 实验室
+//作者： CJW
+//基于指数映射的刚体机器人数学库
+//在该库中，默认通用名称和功能
+/*1. 所有矩阵采用数组形式，即T*，如果外部定义的是二维数组指针可以通过强制转换为T*进行操作
+矩阵检索方式为：M[i][j]=M[i*行长度+j]
+2. 所有矩阵的大小都是非动态，作为参数注意传入的大小
+3. 函数名称R=SO(3)表示旋转矩阵,P表示位置，G=SE(3)表示位姿变换矩阵,V表示速度，A表示加速度，
+Exp表示指数映射，Log表示对数映射，Ad和ad表示李代数的伴随变换
+T表示转置，Inv表示逆，Det表示行列式
+4. 旋量采用（s,sxr)形式：速度为（w,v)加速度为（a,av)，力矩为（f,m)，注意：输出与输入保持一致！！！
+*/
+/*********************************************************************************************/
 #ifndef CJW_MATH
 #define CJW_MATH
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdarg.h>
 #include <math.h>
 
 #define USE_EIGEN
@@ -26,6 +40,7 @@ using namespace Eigen;
 #define    EXP_ZERO      0.001
 #define    INF           100000000
 #define    M_ComputeMAX  100
+
 /***************************定义计算错误************************/
 #define    M_RIGHT       0
 #define    M_ERROR       1
@@ -89,7 +104,7 @@ public:
     int MySolveGS(int mym,TT* A, TT* b,TT* x);
 
     /*****************************三阶矩阵运算*****************************/
-    TT MyMatrix3det(TT A[9]);//三阶矩阵行列式
+    TT   MyMatrix3det(TT A[9]);//三阶矩阵行列式
     int  MyMatrix3Inv(TT A[9],TT out[9]);//三阶矩阵逆矩阵
 
     /*****************************旋转矩阵运算****************************/
@@ -118,7 +133,7 @@ public:
 
     /*****************************基于指数坐标表达****************************/
     void MyExponent3ToR(TT w[3], TT R[9]);//指数坐标转旋转矩阵
-    void MyRToExponent3(TT R[9], TT w[3]);//旋转矩阵=指数坐标
+    void MyRToExponent3(TT R[9], TT w[3]);//旋转矩阵转指数坐标
     void MyExponent3ToQuaternion(TT w[3], TT q[4]);//指数坐标转四元数xyzw
     void MyQuaternionToExponent3(TT q[4],TT w[3]);//四元数xyzw转指数坐标
     void MyExponent4ToG(TT w[6], TT R[16]);//指数坐标转位姿矩阵
@@ -166,6 +181,7 @@ public:
     //SE(3)空间映射成SE（2）
     void MySE3ToSE2(TT G0[16],TT Gout[16]);
     void MySE3ToSE2(TT G0[16],TT V0[6],TT Gout[16],TT Vout[6]);
+
     /********************单刚体指数坐标控制*************************************************/
     void RigidBody_SO3_Pcontroller(TT Re[9],TT Ve[3],TT Rr[9],TT Kp[3],TT Vout[3]);
     void RigidBody_SE3_Pcontroller(TT Ge[16],TT Ve[6],TT Gr[16],TT Kp[6],TT Vout[6]);
@@ -180,6 +196,19 @@ public:
     /*******************************基于惯性中心的动力学方程*****************************************/
     void DynamicBaseCOI(TT BodyM[36],TT BodydM[36],TT BodyV[6],TT BodyA[6],TT outFref[6]);
 
+    /*************************************串联指数积公式*************************************/
+    void MyExponent3ToR(TT ww[3], TT th, TT R[9]);//轴-角 转旋转矩阵
+    void MyExponent4ToG(TT ww[6], TT th, TT G[16]);//旋量-角度 转位姿矩阵
+    int MySeriesR(TT Rout[9], int N, ...);//旋转矩阵连乘Rout=R1*...*RN,变参数为关节角速度
+    int MySeriesG(TT Gout[16], int N, ...);//位姿矩阵连乘Gout=G1*...*GN,变参数为关节旋量
+    int MySeriesExp3ToR(TT Rout[9], TT* th, int N,  ...);//轴-角 转 旋转矩阵连乘,变参数为关节角速度
+    int MySeriesExp4ToG(TT Gout[16], TT* th,int N,  ...);//旋量-角度 转 位姿矩阵连乘,变参数为关节旋量
+    int MySeriesScrewToJacobianS( TT* Jout, TT* th,int N, ...);//旋量-角度 转 位姿矩阵连乘的雅克比-根部坐标系,变参数为关节旋量
+    int MySeriesScrewToJacobianB( TT* Jout, TT* th,int N, ...);//旋量-角度 转 位姿矩阵连乘的雅克比-末端坐标系,变参数为关节旋量
+    //旋量-角度 转 位姿矩阵连乘的质心-根部坐标系,变参数为质心位置和关节旋量：m_p[0],screw[0],m_p[1],screw[1] ...
+    int MySeriesScrewMassToCoM(TT* sum_mass,TT CoMout[3], TT* mass, TT* th,int N, ...);
+    //旋量-角度 转 位姿矩阵连乘的广义惯性矩阵-根部坐标系,变参数为广义惯性矩阵和关节旋量：M[0],screw[0],M[1],screw[1] ...
+    int MySeriesScrewInertiaToCoI(TT CoIout[36], TT* th, int N, ...);
 
     /*************************************************一些几何运算****************************************/
     //三位空间点P0到（PA-PB）组成的直线距离
